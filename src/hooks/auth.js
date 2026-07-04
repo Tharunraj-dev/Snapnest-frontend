@@ -15,6 +15,7 @@ export const useLogin = () => {
       navigate("/dashboard");
     } catch (error) {
       console.log(error);
+      return error.response?.data?.message || "Login failed. Please try again.";
     }
   }
 }
@@ -27,6 +28,7 @@ export const useSignup = () => {
       navigate("/login");
     } catch (error) {
       console.log(error);
+      return error.response?.data?.message || "Signup failed. Please try again.";
     }
   };
 }
@@ -42,6 +44,7 @@ export const useLogout =() =>{
     navigate("/login");
   }catch(error){
     console.log(error);
+    return error?.response?.data?.message || "Logout failed. Please try again.";
   }
   }
 }
