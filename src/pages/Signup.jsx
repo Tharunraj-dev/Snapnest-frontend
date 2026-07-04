@@ -25,16 +25,20 @@ const Signup = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate("/profile");
     }
   }, []);
 
-
+  useEffect(() => {
+    document.title = "Login - SnapNest";
+  }, []);
+  
   useEffect(() => {
     if (toastMessage.text && toastMessage.type) {
       setShow(true);
     }
   }, [toastMessage]);
+
 
   const handleInputChange = (e) => {
     const { id, value, type, checked } = e.target;

@@ -23,17 +23,15 @@ const Login = () => {
   });
   const [isLoading, setLoading] = useState(false);
 
-  
-
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      navigate("/user/profile");
     }
-  }, []);
+  }, [isAuthenticated]);
 
   useEffect(() => {
-    console.log("Credientials updated:", credientials);
-  }, [credientials]);
+    document.title = "Login - SnapNest";
+  }, []);
 
   useEffect(() => {
     if (toastMessage.text && toastMessage.type) {
