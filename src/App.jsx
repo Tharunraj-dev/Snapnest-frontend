@@ -1,13 +1,16 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import Home from "./pages/Home";
+import Toaster from "./components/Toaster";
 import Loading from "./components/Loading";
+import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import UserRoutes from "./routes/userRoutes";
+
 function App() {
   return (
     <div className="vw-100 vh-100 overflow-auto">
       <Loading />
+      <Toaster />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Home />} />
