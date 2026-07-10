@@ -2,13 +2,14 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./../features/authSlice";
 import loadingReducer from "./../features/LoadingSlice";
 import toastReducer from "./../features/toastSlice";
-
+import chatReducer from "./../features/chatSlice";
 const store = configureStore({
   devTools: true,
   reducer: {
     auth: authReducer,
     loading: loadingReducer,
-    toast :toastReducer,
+    toast: toastReducer,
+    chat: chatReducer,
   },
 });
 
