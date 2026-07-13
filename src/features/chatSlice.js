@@ -1,24 +1,34 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { ban } from "lucide-react";
 
 const chatSlice = createSlice({
   name: "chats",
-  initialState: [],
+  initialState: {
+    senderName: "",
+    chatId: "",
+    chats: [],
+  },
   renders: {
+    updateSenderInfo: (state, action) => {
+      state.senderName = action.payload.name;
+      state.chatId = action.payload.chatId;
+    },
+    setPreviousChat: (state, action) => {
+      state.chats = action.payload;
+    },
     addmessage: (state, action) => {
       const newMessage = {
-        id: crypto.randomUUID(),
+        id: action.payload.id,
         content: action.payload.content,
         senderId: action.payload.senderId,
         timeStamp: action.payload.timeStamp,
         isEdited: false,
         isDeleted: false,
       };
-      state.push(newMessage);
+      state.chats.push(newMessage);
     },
     editMessage: (state, action) => {
       const { id, content } = action.payload;
-      return state.map((message) => {
+      return state.chats.map((message) => {
         if (message.id !== id) return message;
         message.content = content;
         message.isEdited = true;
@@ -27,16 +37,24 @@ const chatSlice = createSlice({
     },
     deleteMessage: (state, action) => {
       const { id, senderName } = action.payload;
-      return state.map((message) => {
+      return state.chats.map((message) => {
         if (message.id !== id) return message;
         message.content = `${senderName} deleted the message`;
         message.isDeleted = true;
         return message;
       });
     },
-    clearChat: (state) => [],
+    clearChat: (state) => {
+      state.chats = [];
+    },
   },
 });
 
-export const { addmessage, editMessage, deleteMessage, clearChat } = chatSlice.actions;
+export const {
+  updateSenderInfo,
+  addmessage,
+  editMessage,
+  deleteMessage,
+  clearChat,
+} = chatSlice.actions;
 export default chatSlice.reducer;

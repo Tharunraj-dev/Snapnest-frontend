@@ -9,9 +9,9 @@ export const useSocketOn = (event, callbank) => {
   }, [socket]);
 };
 
-export const useSocketEmit = (event, data) => {
+export const useSocketEmit = () => {
   if (!socket) return null;
-  return useCallback(() => {
+  return useCallback((event, data) => {
     if (!socket) return;
     socket.emit(event);
   }, [socket]);
