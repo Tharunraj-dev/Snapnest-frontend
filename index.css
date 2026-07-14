@@ -1,0 +1,4 @@
+.hover\:bg-gray:hover{
+    background: rgb(50, 49, 49);
+    cursor: pointer;
+}

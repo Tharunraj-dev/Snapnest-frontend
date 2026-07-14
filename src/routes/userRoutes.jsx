@@ -4,6 +4,8 @@ import { useEffect } from "react";
 import Cookie from "js-cookie";
 
 import Profile from "./../pages/user/Profile";
+import ChatContainer from "../pages/user/chats/ChatContainer";
+
 import { initializeData } from "./../features/authSlice";
 import fethData from "./../api/fetchData";
 
@@ -30,6 +32,7 @@ const userRoutes = () => {
   return (
     <Routes>
       <Route path="/profile" element={<Profile />} />
+      <Route path="/chats" element={<ChatContainer />} />
     </Routes>
   );
 };

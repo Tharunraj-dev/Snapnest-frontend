@@ -6,8 +6,8 @@ import {
   useSendMessage,
   useReciveSignal,
   useSenderMessage,
-} from "../../hooks/chatSocket";
-import { useEditMessage } from "../../hooks/chatOperation";
+} from "../../../hooks/chatSocket";
+import { useEditMessage } from "../../../hooks/chatOperation";
 import { useEffect } from "react";
 
 const chatBlock = ({ chatId, senderId }) => {
@@ -23,9 +23,17 @@ const chatBlock = ({ chatId, senderId }) => {
   }, []);
 
   return (
-    <div className="w-100 h-100">
-      <div className=""></div>
-    </div>
+    <>
+      {chatId && senderId ? (
+        <div className="w-100 h-100">
+          <div className=""></div>
+        </div>
+      ) : (
+        <div className="w-100 text-center text-secondary">
+          Your messages will appear here once you pick a conversation.
+        </div>
+      )}
+    </>
   );
 };
 
