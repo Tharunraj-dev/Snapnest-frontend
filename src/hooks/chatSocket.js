@@ -1,5 +1,5 @@
 import { useSocketEmit, useSocketOn } from "./socketFunction";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   useAddMessage,
   useDeleteMessage,
@@ -7,9 +7,27 @@ import {
   useSetPreviousChat,
   useSetSenderInfo,
 } from "./chatOperation";
+import { initialChatList } from "../features/chatList";
 import { useToaster } from "./toast";
+import api from "../services/api";
 
-export const useJointChat = (chatId) => {
+export const useGetChatList = () => {
+  const dispatch = useDispatch();
+  const toast = useToaster();
+  return async () => {
+    try {
+      const res = await api.get("/api/chats/chat-list");
+      dispatch(initialChatList(res.data || []));
+    } catch (error) {
+      toast(
+        error?.response?.data?.message || "Something Went Wrong!",
+        "danger",
+      );
+    }
+  };
+};
+
+export const useJointChat = () => {
   const emit = useSocketEmit();
   return (chatId, senderId) => emit("jon_chat", { chatId, senderId });
 };

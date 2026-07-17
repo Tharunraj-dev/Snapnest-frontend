@@ -3,6 +3,8 @@ import authReducer from "./../features/authSlice";
 import loadingReducer from "./../features/LoadingSlice";
 import toastReducer from "./../features/toastSlice";
 import chatReducer from "./../features/chatSlice";
+import chatListReducer from "./../features/chatList";
+
 const store = configureStore({
   devTools: true,
   reducer: {
@@ -10,6 +12,7 @@ const store = configureStore({
     loading: loadingReducer,
     toast: toastReducer,
     chat: chatReducer,
+    chatList: chatListReducer,
   },
 });
 

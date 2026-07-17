@@ -1,10 +1,24 @@
 import { useEffect, useState } from "react";
-import { SearchIcon, X } from "lucide-react";
+import { useSelector } from "react-redux";
+import { SearchIcon, User, X } from "lucide-react";
 
 import SnapnestLogo from "./../../../assets/Snapnest_logo.png";
+import { useGetChatList } from "../../../hooks/chatSocket";
 
 const ChatConainer = () => {
   const [search, setSearch] = useState("");
+
+  const getChatList = useGetChatList();
+
+  useEffect(() => {
+    getChatList();
+  },[]);
+
+  const { chatList } = useSelector((state) => state.chatList);
+
+  let contactList = chatList.filter((chat) => {
+    return chat.senderName.includes(search);
+  });
 
   return (
     <div className="w-100 h-100 bg-dark overflow-hidden">
@@ -21,7 +35,7 @@ const ChatConainer = () => {
           <div className="position-relative w-100 px-3">
             <input
               type="text"
-              id="search-input "
+              id="search-input"
               className="w-100 form-control shadow-none ps-4 pe-4 "
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -50,13 +64,24 @@ const ChatConainer = () => {
           </div>
 
           <div className="flex-grow-1 w-100 h-auto p-3 mt-3">
-            {[{ profileURL: "", senderName: "" }].map((element, index) => (
+            {contactList.map((element, index) => (
               <div
                 key={`${crypto.randomUUID()}-${index}`}
-                className="hover:bg-gray d-flex align-items-center gap-1 w-100 p-1 rounded-3"
+                className="hover:bg-gray d-flex align-items-center gap-3 w-100 p-2 rounded-3"
               >
-                <div className="" style={{width:"20px" ,height:"50px"}}></div>
-                <div className=""></div>
+                <div
+                  className="bg-primary d-flex justify-content-center align-items-center rounded-circle overflow-hidden"
+                  style={{ width: "50px", height: "50px" }}
+                >
+                  {element.profileURL ? (
+                    <img src={element.profileURL} className="w-100 h-100" />
+                  ) : (
+                    <User size={26} className="text-white" />
+                  )}
+                </div>
+                <div className="text-secondary h4 mt-2">
+                  {element.senderName}
+                </div>
               </div>
             ))}
           </div>
