@@ -2,9 +2,10 @@ import { useCallback } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import {
   addmessage,
+  clearChat,
   deleteMessage,
   editMessage,
-  clearChat,
+  setPreviousChat,
   updateSenderInfo,
 } from "../features/chatSlice";
 
@@ -18,7 +19,7 @@ export const useSetSenderInfo = () => {
 export const useSetPreviousChat = () => {
   const dispatch = useDispatch();
   return (chats) => {
-    dispatch(SetPreviousChat(chats));
+    dispatch(setPreviousChat(chats.chats));
   };
 };
 
@@ -26,13 +27,13 @@ export const useAddMessage = () => {
   const dispatch = useDispatch();
   const { uid } = useSelector((state) => state.auth);
   return useCallback(
-    (content, senderId = uid, timestamp = Date.now()) => {
-      const newMessage = {
-        id: crypto.randomUUID(),
-        content,
-        senderId,
-        timestamp,
-      };
+    ({
+      id = crypto.randomUUID(),
+      content,
+      senderId = uid,
+      timestamp = Date.now(),
+    }) => {
+      const newMessage = { id, content, senderId, timestamp };
       dispatch(addmessage(newMessage));
       return newMessage;
     },
@@ -43,7 +44,7 @@ export const useAddMessage = () => {
 export const useEditMessage = () => {
   const dispatch = useDispatch();
   return (messageId, content) => {
-    dispatch(EditIconmessage({ messageId, content }));
+    dispatch(editMessage({ messageId, content }));
   };
 };
 

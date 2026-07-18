@@ -7,7 +7,7 @@ const chatSlice = createSlice({
     chatId: "",
     chats: [],
   },
-  renders: {
+  reducers: {
     updateSenderInfo: (state, action) => {
       state.senderName = action.payload.name;
       state.chatId = action.payload.chatId;
@@ -20,7 +20,7 @@ const chatSlice = createSlice({
         id: action.payload.id,
         content: action.payload.content,
         senderId: action.payload.senderId,
-        timeStamp: action.payload.timeStamp,
+        timestamp: action.payload.timestamp,
         isEdited: false,
         isDeleted: false,
       };
@@ -52,9 +52,11 @@ const chatSlice = createSlice({
 
 export const {
   updateSenderInfo,
+  setPreviousChat,
   addmessage,
   editMessage,
   deleteMessage,
   clearChat,
 } = chatSlice.actions;
+
 export default chatSlice.reducer;

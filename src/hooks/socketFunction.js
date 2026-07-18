@@ -13,6 +13,8 @@ export const useSocketEmit = () => {
   if (!socket) return null;
   return useCallback((event, data) => {
     if (!socket) return;
-    socket.emit(event);
+    console.log(event, data);
+    
+    socket.emit(event, data);
   }, [socket]);
 };

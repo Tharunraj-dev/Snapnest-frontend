@@ -1,8 +1,24 @@
 .hover\:bg-gray {
- transition: all 0.1s ease-in;
+  transition: all 0.1s ease-in;
 }
 
-.hover\:bg-gray:hover{
-    background: rgb(50, 49, 49);
-    cursor: pointer;
+.hover\:bg-gray:hover {
+  background: rgb(50, 49, 49);
+  cursor: pointer;
+}
+
+.h-80vh {
+  height: 80vh;
+}
+
+.max-w-500px {
+  max-width: 500px;
+}
+
+.end-20px {
+  right: 20px;
+}
+
+.outline-none {
+  outline: none;
 }

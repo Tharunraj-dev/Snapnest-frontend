@@ -29,15 +29,19 @@ export const useGetChatList = () => {
 
 export const useJointChat = () => {
   const emit = useSocketEmit();
-  return (chatId, senderId) => emit("jon_chat", { chatId, senderId });
+
+  return (chatId, senderId) => {
+    console.log(chatId, senderId);
+    emit("join_chat", { chatId, senderId });
+  };
 };
 
 export const useSendMessage = () => {
-  const addMessage = useMessage();
+  const addMessage = useAddMessage();
   const emit = useSocketEmit();
   return (message) => {
     if (!emit) return;
-    const messageInfo = addMessage(message);
+    const messageInfo = addMessage({ content: message });
     emit("send_message", messageInfo);
   };
 };
@@ -63,7 +67,7 @@ export const useDeleteSignal = () => {
   };
 };
 
-export const receiveSignal = () => {
+export const useReciveSignal = () => {
   const addMessage = useAddMessage();
   const editMessage = useEditMessage();
   const deleteMessage = useDeleteMessage();
@@ -78,13 +82,14 @@ export const receiveSignal = () => {
   useSocketOn("prev_chat", (chats) => {
     setPreviousChat(chats);
   });
-  useSocketOn("receive_message", ({ id, content, senderId, timestamp }) => {
-    addMessage(id, content, senderId, timestamp);
+  useSocketOn("recieve_message", ({ id, content, senderId, timestamp }) => {
+    console.log("recieve_message", { id, content, senderId, timestamp });
+    addMessage({ id, senderId, content, timestamp });
   });
   useSocketOn("edit_message", ({ messageId, content }) => {
     addMessage(messageId, content);
   });
-  useSocketOn("receive_message", ({ id, senderName }) => {
+  useSocketOn("delete_message", ({ id, senderName }) => {
     addMessage(id, senderName);
   });
   useSocketOn("error_message", ({ message }) => {
