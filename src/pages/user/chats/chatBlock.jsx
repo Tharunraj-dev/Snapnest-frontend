@@ -7,25 +7,48 @@ import {
   useReciveSignal,
 } from "../../../hooks/chatSocket";
 import { useEditMessage } from "../../../hooks/chatOperation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send, User } from "lucide-react";
 import formatTime from "../../../utility/formatTime";
+import { forwardRef } from "react";
 
 const ChatBlock = ({ chatId, senderId, profileURL }) => {
   const [message, setMessage] = useState("");
+
+  const messageInputRef = useRef(null);
+  const messageContainerRef = useRef(null);
+  const contextMenueRef = useRef([]);
 
   const joinChat = useJointChat();
   const sendMessage = useSendMessage();
   const editMessage = useEditMessage();
   const deleteMessage = useDeleteSignal();
 
+  const sendByMe = [];
+  const sendByUser = [];
+
   useReciveSignal();
   const { senderName, chats } = useSelector((state) => state.chat);
   const { uid } = useSelector((state) => state.auth);
+
   useEffect(() => {
     if (!chatId || !senderId) return;
     joinChat(chatId, senderId);
   }, [chatId, senderId]);
+
+  useEffect(() => {
+    document.addEventListener("keydown", (e) => {
+      if (!/^[a-zA-z]$/.test(e.key)) return;
+      messageInputRef.current?.focus();
+    });
+  }, []);
+
+  useEffect(() => {
+    messageContainerRef.current?.scrollTo({
+      top: messageContainerRef.current?.scrollHeight ?? 0,
+      behavior: "smooth",
+    });
+  }, [chats]);
 
   const handleSendMessage = () => {
     let messageContent = message.trim();
@@ -33,6 +56,8 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
     sendMessage(messageContent);
     setMessage("");
   };
+
+  const handleEditMessage = () => {};
 
   return (
     <>
@@ -59,7 +84,7 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
               return (
                 <div
                   key={chat.id}
-                  className={`w-100 d-flex flex-column  ${chat.senderId == uid ? "justify-content-end" : "justify-content-start"} px-4 py-2`}
+                  className={`position-relative w-100 d-flex flex-column  ${chat.senderId == uid ? "align-items-end" : "align-items-start"} px-4 py-2`}
                 >
                   <div className="d-flex flex-column">
                     <div className="max-w-500px bg-secondary text-white p-3 rounded-3">
@@ -68,6 +93,10 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
                     <div className="text-secondary text-uppercase">
                       {formatTime(chat.timestamp)}
                     </div>
+                    <ContextMenu
+                      ref={(el) => (contextMenueRef[index] = el)}
+                      options={chat.senderId == uid ? sendByMe : sendByUser}
+                    />
                   </div>
                 </div>
               );
@@ -76,6 +105,7 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
 
           <div className="position-relative w-100 d-flex justify-content-center px-3">
             <input
+              ref={messageInputRef}
               type="text"
               id="message-input"
               className="w-100 px-2 py-2 rounded-3 outline-none "
@@ -111,5 +141,22 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
     </>
   );
 };
+
+const ContextMenu = forwardRef(({ options }, ref) => {
+  return (
+    <div className="position-absolute p-2">
+      {options.map((option, index) => (
+        <div
+          key={option.text}
+          className="d-flex justify-content-center align-items-center gap-2"
+        >
+          <div className="">
+            <option.icon />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+});
 
 export default ChatBlock;
