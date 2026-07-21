@@ -24,7 +24,7 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
 
   const joinChat = useJointChat();
   const sendMessage = useSendMessage();
-  const editMessage = useEditMessage();
+  const editMessage = useEditSignal();
   const deleteMessage = useDeleteSignal();
 
   const { senderName, chats } = useSelector((state) => state.chat);
@@ -33,21 +33,46 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
   const sendByMe = [
     {
       icon: Copy,
-      text: "Copy to Clipboard",
-      onClick: async (index) => {
+      text: "Copy To Clipboard",
+      onClick: async ({ content }) => {
         try {
-          await navigator.clipboard.writeText(chats[index]?.content || "");
+          await navigator.clipboard.writeText(content);
         } catch (error) {
           console.warn("Browser not Supported Copy Option!");
         } finally {
-          handleClickOutSide();
+          closeContextMenu();
         }
       },
     },
-    { icon: Edit, text: "Edit" },
-    { icon: Trash2, text: "Trash" },
+    {
+      icon: Edit,
+      text: "Edit",
+      onClick: (data) => {
+        console.log(data);
+      },
+    },
+    {
+      icon: Trash2,
+      text: "Unsend",
+      onClick: ({ id }) => deleteMessage(id),
+    },
   ];
-  const sendByUser = [{ icon: Copy, text: "Copy to clipboard" }];
+
+  const sendByUser = [
+    {
+      icon: Copy,
+      text: "Copy To Clipboard",
+      onClick: async ({ content }) => {
+        try {
+          await navigator.clipboard.writeText(content);
+        } catch (error) {
+          console.warn("Browser not Supported Copy Option!");
+        } finally {
+          closeContextMenu();
+        }
+      },
+    },
+  ];
 
   useReciveSignal();
 
@@ -58,13 +83,15 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!/^[a-zA-z]$/.test(e.key)) return;
+      if (!/^[a-zA-Z ]$/.test(e.key)) return;
       messageInputRef.current?.focus();
     };
 
     const handleClickOutSide = (e) => {
       const menu = contextMenuRef.current[contextMenuIndex];
-      if (menu?.contains(e.target)) return;
+      console.log(!menu?.contains(e.target));
+
+      if (!menu?.contains(e.target)) return;
       openedMenuRef.current?.classList.remove("d-flex");
       openedMenuRef.current?.classList.add("d-none");
       openedMenuRef.current = null;
@@ -73,6 +100,7 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
 
     document.addEventListener("keydown", handleKeyDown);
     document.addEventListener("click", handleClickOutSide);
+
     () => {
       document.removeEventListener("keydown", handleKeyDown);
       document.removeEventListener("click", handleClickOutSide);
@@ -88,10 +116,11 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
 
   useEffect(() => {
     const menu = contextMenuRef.current[contextMenuIndex];
-    if (openedMenuRef.current && openedMenuRef.current === menu) {
+    if (openedMenuRef.current && openedMenuRef.current !== menu) {
       openedMenuRef.current?.classList.remove("d-flex");
       openedMenuRef.current?.classList.add("d-none");
     }
+    console.log(openedMenuRef.current, menu);
     menu?.classList.remove("d-none");
     menu?.classList.add("d-flex");
     openedMenuRef.current = menu;
@@ -100,12 +129,14 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
   const handleContextMenu = useCallback(
     (e, index) => {
       e.preventDefault();
+      console.log(e, index);
+
       setContextMenuIndex(index);
     },
     [contextMenuIndex],
   );
 
-  const handleClickOutSide = () => {
+  const closeContextMenu = () => {
     openedMenuRef.current?.classList.remove("d-flex");
     openedMenuRef.current?.classList.add("d-none");
     openedMenuRef.current = null;
@@ -118,9 +149,6 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
     sendMessage(messageContent);
     setMessage("");
   };
-
-  const handleEditMessage = () => {};
-
   return (
     <>
       {chatId && senderId ? (
@@ -141,27 +169,27 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
             </div>
           </div>
 
-          <div className="w-100 h-80vh overflow-auto">
+          <div ref={messageContainerRef} className="w-100 h-80vh overflow-auto">
             {chats.map((chat, index) => {
               return (
                 <div
                   key={chat.id}
                   className={`position-relative w-100 d-flex flex-column  ${chat.senderId == uid ? "align-items-end" : "align-items-start"} px-4 py-2`}
-                  onContextMenu={(e) => handleContextMenu(e, index)}
                 >
-                  <div className="d-flex flex-column">
-                    <div className="max-w-500px bg-secondary text-white p-3 rounded-3">
-                      {chat.content}
-                    </div>
-                    <div className="text-secondary text-uppercase">
-                      {formatTime(chat.timestamp)}
-                    </div>
-                    <ContextMenu
-                      ref={(el) => (contextMenuRef.current[index] = el)}
-                      options={chat.senderId == uid ? sendByMe : sendByUser}
-                      pos={index}
-                    />
+                  <div
+                    className="max-w-500px bg-secondary text-white p-3 rounded-3"
+                    onContextMenu={(e) => handleContextMenu(e, index)}
+                  >
+                    {chat.content}
                   </div>
+                  <div className="text-secondary text-uppercase">
+                    {formatTime(chat.timestamp)}
+                  </div>
+                  <ContextMenu
+                    ref={(el) => (contextMenuRef.current[index] = el)}
+                    options={chat.senderId == uid ? sendByMe : sendByUser}
+                    data={chat}
+                  />
                 </div>
               );
             })}
@@ -176,10 +204,7 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  console.log(e.key);
-                  handleSendMessage();
-                }
+                if (e.key === "Enter") handleSendMessage();
               }}
               placeholder="Type a Message"
               autoComplete="off"
@@ -206,17 +231,17 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
   );
 };
 
-const ContextMenu = forwardRef(({ options, pos }, ref) => {
+const ContextMenu = forwardRef(({ options, data }, ref) => {
   return (
     <div
       ref={ref}
-      className="bg-black w-25 text-white position-absolute end-0 bottom-100 d-none flex-column gap-2 p-1 rounded-2 hover:bg-gray"
+      className="bg-black w-25 text-white position-absolute bottom-100 d-none flex-column align-items-start gap-3 p-3 rounded-2 hover:bg-gray user-select-none"
     >
       {options.map((option, index) => (
         <div
           key={option.text}
           className="d-flex justify-content-center align-items-center gap-2"
-          onClick={() => option.onClick(pos)}
+          onClick={() => option.onClick(data)}
         >
           <div className="">
             <option.icon />
