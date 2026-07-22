@@ -8,12 +8,12 @@ import {
 } from "../../../hooks/chatSocket";
 
 import { useEditMessage } from "../../../hooks/chatOperation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Copy, Edit, Send, Trash2, User } from "lucide-react";
 import formatTime from "../../../utility/formatTime";
 import { forwardRef } from "react";
 
-const ChatBlock = ({ chatId, senderId, profileURL }) => {
+const ChatBlock = React.memo(({ chatId, senderId, profileURL }) => {
   const [message, setMessage] = useState("");
   const [contextMenuIndex, setContextMenuIndex] = useState(-1);
 
@@ -54,7 +54,10 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
     {
       icon: Trash2,
       text: "Unsend",
-      onClick: ({ id }) => deleteMessage(id),
+      onClick: ({ id }, index) => {
+        deleteMessage(id, index);
+        closeContextMenu();
+      },
     },
   ];
 
@@ -176,20 +179,34 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
                   key={chat.id}
                   className={`position-relative w-100 d-flex flex-column  ${chat.senderId == uid ? "align-items-end" : "align-items-start"} px-4 py-2`}
                 >
-                  <div
-                    className="max-w-500px bg-secondary text-white p-3 rounded-3"
-                    onContextMenu={(e) => handleContextMenu(e, index)}
-                  >
-                    {chat.content}
-                  </div>
-                  <div className="text-secondary text-uppercase">
-                    {formatTime(chat.timestamp)}
-                  </div>
-                  <ContextMenu
-                    ref={(el) => (contextMenuRef.current[index] = el)}
-                    options={chat.senderId == uid ? sendByMe : sendByUser}
-                    data={chat}
-                  />
+                  {chat.isDeleted ? (
+                    <>
+                      <div className="max-w-500px bg-secondary text-white p-3 rounded-3">
+                        {chat.content}
+                      </div>
+                      <div className="text-secondary text-uppercase">
+                        {formatTime(chat.timestamp)}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        className="max-w-500px bg-secondary text-white p-3 rounded-3"
+                        onContextMenu={(e) => handleContextMenu(e, index)}
+                      >
+                        {chat.content}
+                      </div>
+                      <div className="text-secondary text-uppercase">
+                        {formatTime(chat.timestamp)}
+                      </div>
+                      <ContextMenu
+                        ref={(el) => (contextMenuRef.current[index] = el)}
+                        options={chat.senderId == uid ? sendByMe : sendByUser}
+                        data={chat}
+                        index={index}
+                      />
+                    </>
+                  )}
                 </div>
               );
             })}
@@ -229,9 +246,9 @@ const ChatBlock = ({ chatId, senderId, profileURL }) => {
       )}
     </>
   );
-};
+});
 
-const ContextMenu = forwardRef(({ options, data }, ref) => {
+const ContextMenu = forwardRef(({ options, data, index }, ref) => {
   return (
     <div
       ref={ref}
@@ -241,7 +258,7 @@ const ContextMenu = forwardRef(({ options, data }, ref) => {
         <div
           key={option.text}
           className="d-flex justify-content-center align-items-center gap-2"
-          onClick={() => option.onClick(data)}
+          onClick={() => option.onClick(data, index)}
         >
           <div className="">
             <option.icon />
